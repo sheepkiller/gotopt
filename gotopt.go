@@ -1,4 +1,4 @@
-// Package to generate TOPT from 4 to 8 digits with SHA1/SHA256/SHA512 hash functions
+// Package to generate/validate TOPT from 4 to 8 digits with SHA1/SHA256/SHA512 hash functions
 package gotopt
 
 import (
@@ -19,7 +19,7 @@ const window = 30
 
 type topt struct {
 	secret []byte
-	digits  int
+	digits int
 	shaX   string
 	msg    []byte
 	ts     uint64
@@ -38,9 +38,9 @@ func (t *topt) getHmac() (hash.Hash, error) {
 }
 
 func newTOPT(str_secret string, digits int, shaX string) (t *topt, err error) {
-        if (digits > 8  || digits < 4 ) {
-            return nil, errors.New("digits must be beetween 4 and 8") 
-        } 
+	if digits > 8 || digits < 4 {
+		return nil, errors.New("digits must be beetween 4 and 8")
+	}
 	t = new(topt)
 	t.secret, err = base32.StdEncoding.DecodeString(str_secret)
 	if err != nil {
@@ -77,7 +77,7 @@ func (t *topt) TOPT() (str_token string, remain uint64, err error) {
 //   digits: number of digits (from 4 to 8)
 //   shaX: hash function (SHA1, SHA256, or SHA512)
 // returns:
-//  str_token: string representation of token (type string) 
+//  str_token: string representation of token (type string)
 //  remain: remaining validity time (type uint64)
 //  err: error
 func GetTOPT(str_secret string, digits int, shaX string) (str_token string, remain uint64, err error) {
@@ -86,4 +86,34 @@ func GetTOPT(str_secret string, digits int, shaX string) (str_token string, rema
 		return "a", 0, err
 	}
 	return t.TOPT()
+}
+
+// Validate a TOPT
+//   str_secret: secret key (strict base32)
+//   digits: number of digits (from 4 to 8)
+//   shaX: hash function (SHA1, SHA256, or SHA512)
+//   topt: token to validate (type string)
+//   interval: validate against previous interval window (30s)
+// returns
+//   valid_token: boolean : true if valid, false if not
+//   err: error
+// XXX: need test
+
+func ValidateTOPT(str_secret string, digits int, shaX string, topt string, interval int) (valid_token bool, err error) {
+	t, err := newTOPT(str_secret, digits, shaX)
+	if err != nil {
+		return false, err
+	}
+	base_ts := t.ts
+	for i := 0; i <= interval; i++ {
+		t.ts = base_ts - uint64(window*i)
+		token, _, err := t.TOPT()
+		if err != nil {
+			return false, err
+		}
+		if topt == token {
+			return true, nil
+		}
+	}
+	return false, nil
 }
