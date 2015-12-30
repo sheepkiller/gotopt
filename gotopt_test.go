@@ -29,7 +29,7 @@ func TestTOTP(test *testing.T) {
 	}
 	for i := range testCases {
 		tc := testCases[i]
-		t, err := NewTOPT(tc.secret, tc.digits, tc.shaX)
+		t, err := newTOPT(tc.secret, tc.digits, tc.shaX)
 		if err != nil {
 			if tc.success != false {
 				test.Errorf("Expected '%s' got '%s'\n", tc.e_err, err)

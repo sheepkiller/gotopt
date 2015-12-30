@@ -37,7 +37,7 @@ func (t *topt) getHmac() (hash.Hash, error) {
 	return nil, errors.New("Unsupported SHA function")
 }
 
-func NewTOPT(str_secret string, digits int, shaX string) (t *topt, err error) {
+func newTOPT(str_secret string, digits int, shaX string) (t *topt, err error) {
         if (digits > 8  || digits < 4 ) {
             return nil, errors.New("digits must be beetween 4 and 8") 
         } 
@@ -81,7 +81,7 @@ func (t *topt) TOPT() (str_token string, remain uint64, err error) {
 //  remain: remaining validity time (type uint64)
 //  err: error
 func GetTOPT(str_secret string, digits int, shaX string) (str_token string, remain uint64, err error) {
-	t, err := NewTOPT(str_secret, digits, shaX)
+	t, err := newTOPT(str_secret, digits, shaX)
 	if err != nil {
 		return "a", 0, err
 	}
