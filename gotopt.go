@@ -98,7 +98,6 @@ func GetTOPT(str_secret string, digits int, shaX string) (str_token string, rema
 //   valid_token: boolean : true if valid, false if not
 //   err: error
 // XXX: need test
-
 func ValidateTOPT(str_secret string, digits int, shaX string, topt string, interval int) (valid_token bool, err error) {
 	t, err := newTOPT(str_secret, digits, shaX)
 	if err != nil {
